@@ -1,46 +1,44 @@
-summary: Gif list development 
-id: giphy-app-2
-categories: multiplatform
-environments: moko-template
-status: published
-Feedback Link: https://github.com/icerockdev/kmp-codelabs/issues
-Analytics Account: UA-81805223-5
-Author: Aleksey Mikhailov <am@icerock.dev>
+Summary: Gif list development 
+<br>id: giphy-app-2
+<br>Categories: multiplatform
+<br>Environments: moko-template
+<br>Status: published
+<br>Feedback Link: https://github.com/icerockdev/kmp-codelabs/issues
+<br>Analytics Account: UA-81805223-5
+<br>Author: Aleksey Mikhailov <am@icerock.dev>
 
-# GiphyApp #2 - Development list of Gifs
+# GiphyApp #2 - Developing list of Gifs
 ## Intro
 
-This manual is the second part in GiphyApp series, before you start we would recommend to do [GiphyApp #1](https://codelabs.kmp.icerock.dev/codelabs/giphy-app-1).
+This lesson is the second part of the GiphyApp series. Before you start, we recommend you do [GiphyApp #1](https://codelabs.kmp.icerock.dev/codelabs/giphy-app-1).
 
-The result of this lession is available on [github](https://github.com/Alex009/giphy-mobile).
+The result of this lession is available in [github](https://github.com/Alex009/giphy-mobile).
 
-## Implement common logic of Gif list in shared library
+## Implement shared logic for Gif list in shared library
 Duration: 30
 
-App should get list of Gifs from GIPHY service. There is an example with getting list of news from newsapi in the project template (using [moko-network](https://github.com/icerockdev/moko-network) with generating network entites and API classes from OpenAPI specification). 
+The app should get a list of Gifs from GIPHY. Here's an example of getting a list of news from newsapi in the project template (using [moko-network](https://github.com/icerockdev/moko-network) to generate the network entites and API classes from the OpenAPI specification). 
 
-We can get OpenAPI spec of GIPHY from [apis.guru](https://apis.guru/browse-apis/) and can replace getting news by getting Gif. 
+We can get the OpenAPI spec for GIPHY from [apis.guru](https://apis.guru/browse-apis/) and replace getting news with getting Gifs. 
 
-Positive
-: Фича списка уже присутствует в шаблоне, поэтому логику не придется реализовывать. Для большего понимания как устроена фича следует ознакомиться с [схемой модуля](https://github.com/icerockdev/moko-template#list-module-scheme) и посмотреть код в `mpp-library:feature:list`.
-
-: Feature List is already in the project template and you have not to implement any additional logic. You can see [scheme of module](https://github.com/icerockdev/moko-template#list-module-scheme) and look into `mpp-library:feature:list` for detail information about it.
+Benefits
+: The project template already comes with the list feature, so no need to implement the logic. To learn more about how this feature works, take a look at the [module scheme](https://github.com/icerockdev/moko-template#list-module-scheme) and at the code in `mpp-library:feature:list`.
 
 ### Replace OpenAPI spec
 
-Replace file `mpp-library/domain/src/openapi.yml` by the content from [OpenAPI spec of GIPHY service](assets/giphy-openapi.yml). After it please do `Gradle Sync` and as the result you will see some errors in the `newsapi` code. Let's update code by new API. 
+Replace file `mpp-library/domain/src/openapi.yml` with the content from the [OpenAPI spec for GIPHY](assets/giphy-openapi.yml). Then do `Gradle Sync` and as a result you will see some errors in the `newsapi` code. Let's update the code with the new API. 
 
-Positive
-: You can find generated files here `mpp-library/domain/build/generate-resources/main/src/main/kotlin`
+Benefits
+: You can find the generated files here `mpp-library/domain/build/generate-resources/main/src/main/kotlin`
 
 ### Replace news by gifs in domain module
-You have to update the following classes after replacing OpenAPI spec in `domain` module:
-- `News` should be replaced by `Gif`;
-- `NewsRepository` – should be replaced by `GifRepository`;
-- `DomainFactory` – add `gifRepository` and set necessary dependencies.
+You have to update the following classes after replacing OpenAPI spec in the `domain` module:
+- `News` should be replaced with `Gif`;
+- `NewsRepository` – should be replaced with `GifRepository`;
+- `DomainFactory` – add `gifRepository` and set the necessary dependencies.
 
 #### News -> Gif
-Let's modify `News` class to the following one:
+Let's modify the `News` class:
 ```kotlin
 @Parcelize
 data class Gif(
@@ -49,9 +47,9 @@ data class Gif(
     val sourceUrl: String
 ) : Parcelable
 ```
-This domain entity contains gif's `id` and two URL (full and preview variant). `id` is used for correct identifying element in a list and in UI animations.
+This domain entity contains a gif `id` and two URLs (the full and preview variants). `id` is used to correctly identify an element in a list and in UI animations.
 
-Let's transform network entity `dev.icerock.moko.network.generated.models.Gif` to domain entity. To do this add one more construct method:
+Let's make the network entity `dev.icerock.moko.network.generated.models.Gif` a domain entity. To do this, add one more method:
 
 ```kotlin
 @Parcelize
@@ -66,10 +64,10 @@ data class Gif(
     )
 }
 ```
-Above there is a field mapping from network entity to domain entity - it will reduce the number of edits if API has been changed.  The application doesn't depend on API implementation.  
+Above, there is a field mapping from the network entity to domain entity - it will reduce the number of edits if the API changes.  The application doesn't depend on API implementation.  
 
 #### NewsRepository -> GifRepository
-Let's change `NewsRepository` to `GifRepository` with the following content:
+Let's change `NewsRepository` to `GifRepository` as follows:
 ```kotlin
 class GifRepository internal constructor(
     private val gifsApi: GifsApi
@@ -86,12 +84,12 @@ class GifRepository internal constructor(
 }
 ```
 
-In this class you have to get `GifsApi` object (generated by `moko-network`) and call a method API `searchGifs`, where we use just `query` string, but other arguments are by default. 
+In this class, you have to get a `GifsApi` object (generated by `moko-network`) and call an API method `searchGifs`, where we use just the `query` string, but other arguments are by default. 
 
-Network entities we have to modify in domain entities, what can be public (network entites generated with `internal` modifier only). 
+We have to convert network entities into domain entities, what can be public (network entites generated with the `internal` modifier only). 
 
 #### DomainFactory
-In `DomainFactory` we have to replace creation `newsApi` and `newsRepository` by the following code:
+In `DomainFactory` we have to replace creation `newsApi` and `newsRepository`:
 
 ```kotlin
 private val gifsApi: GifsApi by lazy {
@@ -109,16 +107,16 @@ val gifRepository: GifRepository by lazy {
 }
 ```
 
-`GifsApi` - it's a generated class, for creation you need a several parameters:
-- `baseUrl` – server url, it will come from factory of native layer. It needed for set up different envoiroment configuration. 
-- `httpClient` - http client object for work with server  (from [ktor-client](https://github.com/ktorio/ktor/)) 
-- `json` - JSON serialization object (from [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization))
+`GifsApi` - it's a generated class, to create it you need several parameters:
+- `baseUrl` – the server url, it will come from the factory of the native layer. It's necessary to set up different envoiroment configurations. 
+- `httpClient` - an http client object to work with the server  (from [ktor-client](https://github.com/ktorio/ktor/)) 
+- `json` - a JSON serialization object (from [kotlinx.serialization](https://github.com/Kotlin/kotlinx.serialization))
 
-`GifRepository` is available outside of module, you can create it using `gifsApi` object only.
+`GifRepository` is available outside of the module. You can create it using the `gifsApi` object only.
 
-There is a `lazy` initialization – API and repository are Singleton objects (objects are alive while the factory is alive and  the factory is created `SharedFactory` exists during life cycle of an application).
+There is a `lazy` initialization – the API and repository are Singleton objects (objects remaining alive while the factory is alive and  the factory is created `SharedFactory` exists during life cycle of an application).
 
-Also we need to send Api Key for work with GIPHY API. To do this we can use `TokenFeature` for `ktor`. It was already connected, we just have to configure it: 
+We also need to send an API Key for working with the GIPHY API. To do this, we can use `TokenFeature` for `ktor`. It has been already connected, so we just have to configure it: 
 
 ```kotlin
 install(TokenFeature) {
@@ -128,14 +126,14 @@ install(TokenFeature) {
     }
 }
 ```
-Every query comes throught `httpClient` will be append by header `api_key: o5tAxORWRXRxxgIvRthxWnsjEbA3vkjV` in this case (this is a sample app key, you can create a your one in [GIPHY admin area](https://developers.giphy.com/dashboard/) if you are  exceed the limit).
+Every query comes through `httpClient` and will be appended by header `api_key: o5tAxORWRXRxxgIvRthxWnsjEbA3vkjV` in this case (this is a sample app key, you can create your own in [GIPHY admin area](https://developers.giphy.com/dashboard/) if you exceed the limit).
 
 ### Update connection between `domain` and `feature:list` from SharedFactory  
 
-In `SharedFactory` we have to change interface of units list factory, `NewsUnitsFactory`, and replace singleton `newsFactory` by `gifsFactory` with `Gif` configuration. 
+In `SharedFactory` we have to change the interface of units list factory, `NewsUnitsFactory`, and replace singleton `newsFactory` with `gifsFactory` with a `Gif` configuration. 
 
 #### NewsUnitsFactory -> GifsUnitsFactory
-Interface of units list factory should be replaced by:  
+The interface of units list factory should be replaced with:  
 ```kotlin
 interface GifsUnitsFactory {
     fun createGifTile(
@@ -144,11 +142,11 @@ interface GifsUnitsFactory {
     ): UnitItem
 }
 ```
-То есть из общей логики будет выдаваться `id` для корректного определения diff'а списка с анимированием обновления и `gifUrl` в котором будет url для вывода анимации на UI.
-So, there will be `id` (for proper diff list calculation for UI animation ) and `gifUrl` (this is url for animation output) from shared code. 
+
+So, the shared logic will output `id` for the proper definition of the diff list, with the UI animation for the updating status, and with `gifUrl` - the url for animation output into the UI. 
 
 #### newsFactory -> gifsFactory
-List Factory should be replaced by the following code: 
+The list Factory should be replaced with the following code: 
 ```kotlin
 val gifsFactory: ListFactory<Gif> = ListFactory(
     listSource = object : ListSource<Gif> {
@@ -170,12 +168,12 @@ val gifsFactory: ListFactory<Gif> = ListFactory(
 )
 ```
 
-In code above there is a data source `listSource` and we call `gifRepository` from `domain` module there. Temporary `query` is set up as `test` value, but we will change it in next lessons. 
-Also there is a parameter `strings`, localization strings, will be implemented in `feature:list` module (this module requires only one string "unknown error"). 
-The last required parameter is `unitsFactory`, but the module works with 1 method factory, `createTile(data: Gif)`, and for native platforms it will be better to use a specific list factory (so every UI-related field was defined from common code). That's why we use `gifsUnitsFactory.createGifTile`. 
+In the code above, there is data source `listSource` and we call `gifRepository` from the `domain` module there. Temporary, `query` is set up as a `test` value, but we will change it in the next lessons. 
+There is also parameter `strings` (localization strings) that will be implemented in the `feature:list` module (this module requires only one string "unknown error"). 
+The last required parameter is `unitsFactory`, but the module works with 1 method factory, `createTile(data: Gif)`, and for native platforms it will be better to use a specific list factory (so every UI-related field is defined from the shared code). That's why we use `gifsUnitsFactory.createGifTile`. 
 
 
-The last thing to do - replace `SharedLibrary` constructor by the following code: 
+The last thing to do - replace the `SharedLibrary` constructor with the following code: 
 ```kotlin
 class SharedFactory(
     settings: Settings,
@@ -184,15 +182,15 @@ class SharedFactory(
     gifsUnitsFactory: GifsUnitsFactory
 )
 ```
-So native platforms will return `GifsUnitsFactory` object. 
+So native platforms will return the `GifsUnitsFactory` object. 
 
 ## Implement Gif list on Android
 Duration: 30
 
 ### Set server URL
-There is a working server URL will be passed from application layer to the common code library so we avoid rebuilding when server url had changed. 
+There is a working server URL that will be passed from the application layer to the shared code library so we avoid rebuilding when the server url changes. 
 
-In our current configuration there is only one environment and only one server url. It set up in `android-app/build.gradle.kts`, let's replace it: 
+In our current configuration, there is only one environment and only one server url. It's set up in `android-app/build.gradle.kts`, let's replace it: 
 
 ```kotlin
 android {
