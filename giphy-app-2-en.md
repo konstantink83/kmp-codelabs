@@ -207,9 +207,9 @@ android {
 ```
 
 ### Dependencies Injection 
-We have to use [glide](https://github.com/bumptech/glide) library for gif rendering and we use [constraintLayout](https://developer.android.com/training/constraint-layout) library for setting aspect ratio 2:1 of list's unit. 
+We have to use the [glide](https://github.com/bumptech/glide) library for gif rendering and we use the [constraintLayout](https://developer.android.com/training/constraint-layout) library to set 2:1 aspect ratio for a list unit. 
 
-`constraintLayout` is already declared in project dependencies and we just need to include it on `android-app`, let's add it in `android-app/build.gradle.kts`:
+`constraintLayout` is already declared in the project dependencies, and we just need to include it in `android-app`, let's add it in `android-app/build.gradle.kts`:
 
 ```kotlin
 dependencies {
@@ -218,7 +218,7 @@ dependencies {
 }
 ```
 
-A `glide` has to be appended in dependencies injection script in `buildSrc/src/main/kotlin/Versions.kt`: 
+A `glide` has to be appended to the dependencies injection script in `buildSrc/src/main/kotlin/Versions.kt`: 
 ```kotlin
 object Versions {
     ...
@@ -245,7 +245,7 @@ object Deps {
         }
 ```
 
-After this we can add in `android-app/build.gradle.kts` the following code: 
+After this we can add the following code to `android-app/build.gradle.kts`: 
 ```kotlin
 dependencies {
     ...
@@ -254,7 +254,7 @@ dependencies {
 ```
 
 ### SharedFactory Initialization 
-To create `SharedFactory` you have to replace `newsUnitsFactory` by `gifsUnitsFactory`. To create this dependency let's modify `NewsUnitsFactory` class to the following: 
+To create `SharedFactory` you have to replace `newsUnitsFactory` with `gifsUnitsFactory`. To create this dependency, let's modify the `NewsUnitsFactory` class as follows: 
 
 ```kotlin
 class GifListUnitsFactory : SharedFactory.GifsUnitsFactory {
@@ -274,7 +274,7 @@ AppComponent.factory = SharedFactory(
 ```
 
 ### GifListUnitsFactory Implementation 
-`SharedFactory.GifsUnitsFactory` interface requires to create `UnitItem` from `id` and `gifUrl` variables. `UnitItem` is a part of [moko-units](https://github.com/icerockdev/moko-units) and you can generate implementation from a DataBinding layout. 
+The `SharedFactory.GifsUnitsFactory` interface requires that we create `UnitItem` from the `id` and `gifUrl` variables. `UnitItem` is a part of [moko-units](https://github.com/icerockdev/moko-units), and you can generate implementation from a DataBinding layout. 
 
 Let's create `android-app/src/main/res/layout/tile_gif.xml` with the following content:
 ```xml
@@ -308,7 +308,7 @@ Let's create `android-app/src/main/res/layout/tile_gif.xml` with the following c
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
 ```
-And run `Gradle Sync` after this – `TileGif` class will be generated automatically and we will use it in `GifListUnitsFactory` class. 
+And run `Gradle Sync` after this – the `TileGif` class will be generated automatically, and we will use it in the `GifListUnitsFactory` class. 
 ```kotlin
 class GifListUnitsFactory : SharedFactory.GifsUnitsFactory {
     override fun createGifTile(id: Long, gifUrl: String): UnitItem {
@@ -320,9 +320,7 @@ class GifListUnitsFactory : SharedFactory.GifsUnitsFactory {
 }
 ```
 
-В самом layout'е мы использовали нестандартный Binding Adapter - `app:gifUrl`. Нужно его реализовать, для этого создадим файл `android-app/src/main/java/org/example/app/BindingAdapters.kt` с содержимым:
-
-In the layout we use non-standart Binding Adapter - `app:gifUrl`. We should implement it. To do this let's create `android-app/src/main/java/org/example/app/BindingAdapters.kt` file with the following code: 
+In the layout we've used non-standard Binding Adapter - `app:gifUrl`. To implement it, let's create an `android-app/src/main/java/org/example/app/BindingAdapters.kt` file with the following code: 
 
 ```kotlin
 package org.example.app
@@ -352,10 +350,10 @@ fun ImageView.bindGif(gifUrl: String?) {
         .into(this)
 }
 ```
-This allows us to set `gifUrl` for `ImageView` from layout. Moreover on loading there will be progress bar and on error it will be error icon. 
+This allows us to set `gifUrl` for `ImageView` from the layout. In addition, there will be a progress bar on loading and an error icon on error. 
 
 ### Create a Gif list screen 
-All that's left to do a screen showing data from our common code. 
+All that's left to do a screen showing data from our shared code. 
 Create `android-app/src/main/res/layout/activity_gif_list.xml` with the content:
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -428,7 +426,7 @@ Create `android-app/src/main/res/layout/activity_gif_list.xml` with the content:
     </FrameLayout>
 </layout>
 ```
-Layout uses Data Binding and show 1 of the 4 states got from `ListViewModel`. There is `SwipeRefreshLayout` with `RecyclerView` inside in data state, and `RecyclerView` uses  `LinearLayoutManager` and `UnitsRecyclerViewAdapter` for rendering `UnitItem` objectes that got from `UnitsFactory`. 
+The layout uses Data Binding and shows 1 of 4 states received from `ListViewModel`. There is `SwipeRefreshLayout` with `RecyclerView` inside data state, and `RecyclerView` uses `LinearLayoutManager` and `UnitsRecyclerViewAdapter` for rendering the `UnitItem` objects received from `UnitsFactory`. 
 
 Let's create `android-app/src/main/java/org/example/app/view/GifListActivity.kt` with the content:
 ```kotlin
@@ -452,14 +450,13 @@ class GifListActivity : MvvmActivity<ActivityGifListBinding, ListViewModel<Gif>>
     }
 }
 ```
-Мы получаем из фабрики `gifsFactory` нашу `ListViewModel<Gif>` и она будет выставлена в поле `viewModel` в layout'е `activity_gif_list`. 
+ 
+We've got `ListViewModel<Gif>` from the `gifsFactory` factory, and it will be inserted into the `viewModel` field from the `activity_gif_list` layout.
 
-We've got `ListViewModel<Gif>` from `gifsFactory` factory and it will be inserted in `viewModel` field from `activity_gif_list` layout.
-
-Also we define `setOnRefreshListener` in code for proper execution `SwipeRefreshLayout` and call `viewModel.onRefresh` that report in lambda when update will be finished and we can turn off the updating animation. 
+We also define `setOnRefreshListener` in code for the proper execution of `SwipeRefreshLayout` and call `viewModel.onRefresh` that reports in lambda when an update will be finished and we can turn off the updating animation.
 
 ### Replace a startup screen 
-Let's set up  `GifListActivity` as a launch screen. To do it let's add `GifListActivity` in `android-app/src/main/AndroidManifest.xml` file and remove others (we don't need it any more). 
+Let's set up `GifListActivity` as a launch screen. To do it let's add `GifListActivity` to the `android-app/src/main/AndroidManifest.xml` file and remove the rest (we don't need it any more).
 ```xml
 <application ...>
 
@@ -473,21 +470,21 @@ Let's set up  `GifListActivity` as a launch screen. To do it let's add `GifListA
 ```
 
 ### Remove unnecessary classes
-Now we can delete all unnnecessary files from project template: 
+We can now delete all unnnecessary files from the project template: 
 - `android-app/src/main/java/org/example/app/view/ConfigActivity.kt`
 - `android-app/src/main/java/org/example/app/view/NewsActivity.kt`
 - `android-app/src/main/res/layout/activity_news.xml`
 - `android-app/src/main/res/layout/tile_news.xml`
 
 ### Run
-You can run the application on Android and see list of Gifs. 
+You can run the application on Android and see the list of Gifs. 
 
 ## Implement Gif list on iOS
 Duration: 30
 
 ### Set server URL
-As well as on Android, a working server URL will be passed from application layer to the common code library so we avoid rebuilding common library when server url had changed.
-This setting can be set in `ios-app/src/AppDelegate.swift` file:
+As well as on Android, a working server URL will be passed from the application layer to the shared code library so we avoid rebuilding the shared library when a server url changes.
+This setting can be set in the `ios-app/src/AppDelegate.swift` file:
 ```swift
 AppComponent.factory = SharedFactory(
     ...
@@ -498,7 +495,7 @@ AppComponent.factory = SharedFactory(
 
 ### Dependencies Injections 
 
-We have to use [SwiftyGif](https://github.com/kirualex/SwiftyGif) for showing gif files. To include it we have to inject `ios-app/Podfile` dependency:
+We have to use [SwiftyGif](https://github.com/kirualex/SwiftyGif) for showing gif files. To include it we have to inject the `ios-app/Podfile` dependency:
 
 ```ruby
 target 'ios-app' do
@@ -506,10 +503,10 @@ target 'ios-app' do
   pod 'SwiftyGif', '5.1.1'
 end
 ```
-and after this we can run a `pod install` command in `ios-app` directory. 
+and after this we can run a `pod install` command in the `ios-app` directory. 
 
 ### SharedFactory Initialization 
-We have to use `gifsUnitsFactory` instead of `newsUnitsFactory` to create `SharedFactory`. To do this let's modify `NewsUnitsFactory` class in following code:
+We have to use `gifsUnitsFactory` instead of `newsUnitsFactory` to create `SharedFactory`. To do this let's modify the `NewsUnitsFactory` class as follows:
 ```swift
 class GifsListUnitsFactory: SharedFactoryGifsUnitsFactory {
     func createGifTile(id: Int64, gifUrl: String) -> UnitItem {
@@ -517,7 +514,7 @@ class GifsListUnitsFactory: SharedFactoryGifsUnitsFactory {
     }
 }
 ```
-And will pass it in `SharedFactory`:
+And will pass it to `SharedFactory`:
 ```swift
 AppComponent.factory = SharedFactory(
     settings: AppleSettings(delegate: UserDefaults.standard),
@@ -527,11 +524,11 @@ AppComponent.factory = SharedFactory(
 )
 ```
 
-### GifListUnitsFactory implementation
+### GifListUnitsFactory Implementation
 
-`SharedFactory.GifsUnitsFactory` interface requires to create `UnitItem` from `id` and `gifUrl` variables. `UnitItem` is a part of [moko-units](https://github.com/icerockdev/moko-units) and implementation requires to create xib with cell interface and specific cell class. 
+The `SharedFactory.GifsUnitsFactory` interface requires us to create `UnitItem` from the `id` and `gifUrl` variables. `UnitItem` is a part of [moko-units](https://github.com/icerockdev/moko-units) and implementation requires us to create xib with a cell interface and specific cell class. 
 
-Create `ios-app/src/units/GifTableViewCell.swift` with the content:
+Create `ios-app/src/units/GifTableViewCell.swift` with this content:
 ```swift
 import MultiPlatformLibraryUnits
 import SwiftyGif
@@ -583,13 +580,13 @@ Then create  `ios-app/src/units/GifTableViewCell.xib` with a cell layout.
 The result looks like this: 
 ![GifTableViewCell.xib](assets/giphy-2-1.png)
 
-We have to set `GifTableViewCell` class in `UITableViewCell` cell: 
+We have to set the `GifTableViewCell` class in the `UITableViewCell` cell: 
 ![GifTableViewCell class](assets/giphy-2-2.png)
 
 And set an identifier for reuse: 
 ![reuseIdentifier](assets/giphy-2-3.png)
 
-Now we can implement `UnitItem` creation in `GifListUnitsFactory`:
+We can now implement `UnitItem` creation in `GifListUnitsFactory`:
 ```swift
 class GifsListUnitsFactory: SharedFactoryGifsUnitsFactory {
     func createGifTile(id: Int64, gifUrl: String) -> UnitItem {
@@ -605,7 +602,7 @@ class GifsListUnitsFactory: SharedFactoryGifsUnitsFactory {
 ```
 
 ### Create a Gif list screen 
-All that's left to do a screen showing data from our common code. 
+All that's left to do is a screen showing data from our shared code. 
 
 Create `ios-app/src/view/GifListViewController.swift` with the content:
 ```swift
@@ -670,16 +667,16 @@ And let's bind `NewsViewController` to `GifListViewController` in `MainStoryboar
 ![GifListViewController](assets/giphy-2-4.png)
 
 ### Replace a startup screen 
-To launch the application from gif screen we have to link `rootViewController` with `GifListViewController` in `Navigation Controller`: 
+To launch the application from the gif screen, we have to link `rootViewController` with `GifListViewController` in `Navigation Controller`: 
 
 ![rootViewController](assets/giphy-2-5.png)
 
 ### Remove unnecessary files
-Now we can delete all unnnecessary files from project:
+Now we can delete all unnnecessary files from the project:
 - `ios-app/src/units/NewsTableViewCell.swift`
 - `ios-app/src/units/NewsTableViewCell.xib`
 - `ios-app/src/view/ConfigViewController.swift`
 - `ios-app/src/view/NewsViewController.swift`
 
 ### Run 
-Now you can run the application on iOS and see a list of Gif. 
+Now you can run the application on iOS and see a list of Gifs. 
